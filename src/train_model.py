@@ -1,15 +1,3 @@
-"""
-train_model.py
-----------------
-Trains ML models for Cardiovascular Disease Risk Prediction.
-Includes:
-1. Logistic Regression from scratch (Week-3 requirement)
-2. Random Forest Classifier (final deployment model)
-3. StandardScaler for numeric features
-4. Evaluation metrics, confusion matrix, ROC–AUC
-5. Saves best model as 'best_model.pkl' and scaler as 'scaler.pkl'
-"""
-
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -22,9 +10,7 @@ from sklearn.metrics import confusion_matrix, classification_report, roc_auc_sco
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 
-# ---------------------------
 # 1. Load Preprocessed Data
-# ---------------------------
 data = pd.read_csv("../data/processed/cleaned_data.csv")
 X = data.drop(columns=["cardio", "id"])
 y = data["cardio"].values
@@ -37,9 +23,7 @@ X_train, X_test, y_train, y_test = train_test_split(
     stratify=y,
 )
 
-# ---------------------------
 # 2. Logistic Regression From Scratch
-# ---------------------------
 def sigmoid(z):
     return 1 / (1 + np.exp(-z))
 
@@ -78,9 +62,7 @@ print("Recall   :", recall_score(y_test, y_pred_scratch))
 print("F1 Score :", f1_score(y_test, y_pred_scratch))
 print("\n" + "="*50 + "\n")
 
-# ---------------------------
 # 3. Random Forest Classifier (Best Model) with Scaling
-# ---------------------------
 
 # Identify numeric columns to scale
 num_cols = ['height', 'weight', 'ap_hi', 'ap_lo', 'bmi', 'age_years']
@@ -108,9 +90,7 @@ rf.fit(X_train_scaled, y_train)
 y_pred_rf = rf.predict(X_test_scaled)
 y_proba_rf = rf.predict_proba(X_test_scaled)[:, 1]
 
-# ---------------------------
 # 4. Evaluation
-# ---------------------------
 print("Random Forest Metrics (Scaled Features):")
 print("Accuracy :", accuracy_score(y_test, y_pred_rf))
 print("Precision:", precision_score(y_test, y_pred_rf))
@@ -148,9 +128,7 @@ best_idx = np.argmax(j_scores)
 best_threshold = thresholds[best_idx]
 print(f"Best threshold (Youden's J): {best_threshold:.4f}")
 
-# ---------------------------
 # 5. Save Best Model and Scaler
-# ---------------------------
 joblib.dump(rf, "../models/best_model.pkl")
 joblib.dump(scaler, "../models/scaler.pkl")
 joblib.dump(best_threshold, "../models/threshold.pkl")
