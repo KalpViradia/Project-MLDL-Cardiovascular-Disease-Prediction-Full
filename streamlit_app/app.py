@@ -112,7 +112,31 @@ with col2:
 
 with col3:
     bmi = weight / ((height / 100) ** 2)
-    st.metric("📌 BMI", f"{bmi:.1f}")
+
+    # BMI Category
+    if bmi < 18.5:
+        bmi_cat = "Underweight"
+        bmi_color = "blue"
+    elif bmi < 25:
+        bmi_cat = "Normal"
+        bmi_color = "green"
+    elif bmi < 30:
+        bmi_cat = "Overweight"
+        bmi_color = "orange"
+    else:
+        bmi_cat = "Obese"
+        bmi_color = "red"
+
+    st.markdown(
+        f"""
+        <div style="margin-top:5px; font-size:1rem; color:gray;">📌 BMI</div>
+        <div style="display:flex; align-items:center; gap:10px;">
+            <div style="font-size:1.5rem; font-weight:bold;">{bmi:.1f}</div>
+            <div style="color:{bmi_color}; font-weight:bold; font-size:1.5rem;">{bmi_cat}</div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
 st.subheader("🩺 Vital Signs")
 col4, col5 = st.columns(2)
