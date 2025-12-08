@@ -122,8 +122,8 @@ with col4:
     ap_lo = st.number_input("💉 Diastolic BP", 50, 150, 80)
 
 with col5:
-    cholesterol = st.selectbox("🧪 Cholesterol", [1,2,3])
-    gluc = st.selectbox("🧪 Glucose", [1,2,3])
+    cholesterol = st.selectbox("🧪 Cholesterol", ["Low", "Medium", "High"])
+    gluc = st.selectbox("🧪 Glucose", ["Low", "Medium", "High"])
 
 st.subheader("🚬 Lifestyle Factors")
 col6, col7, col8 = st.columns(3)
@@ -144,8 +144,8 @@ if st.button("🔮 Predict My Risk"):
         "weight": weight,
         "ap_hi": ap_hi,
         "ap_lo": ap_lo,
-        "cholesterol": cholesterol,
-        "gluc": gluc,
+        "cholesterol": {"Low":1, "Medium":2, "High":3}[cholesterol],
+        "gluc": {"Low":1, "Medium":2, "High":3}[gluc],
         "smoke": smoke,
         "alco": alco,
         "active": active,
