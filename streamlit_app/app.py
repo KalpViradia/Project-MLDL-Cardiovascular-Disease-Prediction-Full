@@ -104,7 +104,7 @@ col1, col2, col3 = st.columns(3)
 
 with col1:
     age = st.number_input("👴 Age (years)", 1, 120, 45)
-    gender = st.selectbox("⚥ Gender", [1,2], format_func=lambda x: "Female" if x==1 else "Male")
+    gender = st.selectbox("⚥ Gender", [1,2], index=1, format_func=lambda x: "Female" if x==1 else "Male")
 
 with col2:
     height = st.number_input("📏 Height (cm)", 100, 220, 165)
