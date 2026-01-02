@@ -119,17 +119,25 @@ if metrics:
         
         with col_a:
             st.markdown(f"""
-            **Model Architecture**
-            - **Algorithm**: {metrics['model_name']}
-            - **Training Method**: RandomizedSearchCV with 3-fold CV
-            """)
+            <div class="additional-metrics-content">
+                <strong>Model Architecture</strong>
+                <ul style="margin-top: 5px;">
+                    <li><strong>Algorithm</strong>: {metrics['model_name']}</li>
+                    <li><strong>Training Method</strong>: RandomizedSearchCV with 3-fold CV</li>
+                </ul>
+            </div>
+            """, unsafe_allow_html=True)
         
         with col_b:
             st.markdown(f"""
-            **Detailed Performance**
-            - **Precision**: {metrics['precision']:.4f} (Accuracy of positive predictions)
-            - **Recall**: {metrics['recall']:.4f} (Coverage of actual positives)
-            """)
+            <div class="additional-metrics-content">
+                <strong>Detailed Performance</strong>
+                <ul style="margin-top: 5px;">
+                    <li><strong>Precision</strong>: {metrics['precision']:.4f} (Accuracy of positive predictions)</li>
+                    <li><strong>Recall</strong>: {metrics['recall']:.4f} (Coverage of actual positives)</li>
+                </ul>
+            </div>
+            """, unsafe_allow_html=True)
     
     # Performance context
     st.info(f"""
