@@ -166,6 +166,32 @@ def apply_theme_css(theme):
         div[data-testid="stMetricLabel"] {
             color: #000000 !important;
         }
+
+        .additional-metrics-content p, 
+        .additional-metrics-content li, 
+        .additional-metrics-content span,
+        .additional-metrics-content strong,
+        .additional-metrics-content div {
+            color: #000000 !important;
+        }
+
+        /* 6. Expander/Dropdown Fix for Light Mode */
+        div[data-testid="stExpander"] details,
+        div[data-testid="stExpander"] summary {
+            background-color: #FFFFFF !important;
+            color: #000000 !important;
+        }
+        
+        div[data-testid="stExpander"] summary:hover {
+             background-color: #FFFFFF !important; /* Keep consistent as requested */
+             color: #000000 !important;
+        }
+
+        div[data-testid="stExpander"] svg {
+            color: #000000 !important;
+            fill: #000000 !important;
+        }
+
         """
     else:
         primary_color = "#4CAF50"   # Lighter Green for dark mode
