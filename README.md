@@ -7,7 +7,7 @@ Dataset: https://www.kaggle.com/datasets/sulianova/cardiovascular-disease-datase
 This project includes:
 
 - Logistic Regression **from scratch** (for learning purposes)
-- A **Random Forest** classifier as the final deployment model
+- **Random Forest**, **XGBoost**, and **LightGBM** classifiers for comparative analysis (with one selected as the final deployment model)
 - Feature engineering (age in years, BMI)
 - Scaling of numeric features with `StandardScaler`
 - Evaluation (accuracy, precision, recall, F1, confusion matrix, ROC–AUC)
@@ -205,3 +205,5 @@ Main Python dependencies (see `requirements.txt`):
 - scikit-learn
 - streamlit
 - joblib
+- xgboost
+- lightgbm

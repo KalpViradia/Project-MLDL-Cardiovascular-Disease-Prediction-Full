@@ -2,101 +2,42 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 import joblib
+import os
+import xgboost  # Necessary for loading XGBoost model
+import lightgbm # Necessary for loading LightGBM model
+
+from utils import setup_page
+
+# Setup Page & Theme
+setup_page("Cardio Risk Prediction", "💓", layout="wide")
 
 # Load Model & Scaler
 @st.cache_resource
 def load_models():
-    model = joblib.load("../models/best_model.pkl")
-    scaler = joblib.load("../models/scaler.pkl")
+    # Load model and scaler (updated to load LightGBM model)
+    # Get the directory where this script is located
+    curr_dir = os.path.dirname(os.path.abspath(__file__))
+    # Construct paths relative to this script
+    model_path = os.path.join(curr_dir, "../models/best_model.pkl")
+    scaler_path = os.path.join(curr_dir, "../models/scaler.pkl")
+    thresh_path = os.path.join(curr_dir, "../models/threshold.pkl")
+
+    model = joblib.load(model_path)
+    scaler = joblib.load(scaler_path)
     try:
-        threshold = joblib.load("../models/threshold.pkl")
+        threshold = joblib.load(thresh_path)
     except FileNotFoundError:
         threshold = 0.7
     return model, scaler, threshold
 
 model, scaler, threshold = load_models()
 
-# Page Config - use wide layout
-st.set_page_config(
-    page_title="Cardio Risk Prediction",
-    layout="wide",            # allow full width so we can control container size
-    initial_sidebar_state="expanded"
-)
-
-# Custom CSS - override Streamlit container and style
-st.markdown("""
-<style>
-/* Make Streamlit's main block container wider and centered */
-.main > div.block-container {
-    max-width: 1200px !important;   /* <-- increase this (900 / 1200 / 1400) */
-    padding-top: 1rem !important;
-    margin-left: auto !important;
-    margin-right: auto !important;
-}
-
-/* Additional container to control inner width (optional) */
-.app-inner-container {
-    max-width: 1100px;
-    margin: 0 auto;
-}
-
-/* tighten input spacing (keep compact) */
-.st-emotion-cache-16idsys,
-.st-emotion-cache-1vbkxk1,
-.st-emotion-cache-1r6slb0,
-.st-emotion-cache-1cdf7s8,
-.st-emotion-cache-1y4p8pa {
-    margin-top: 0 !important;
-    padding-top: 0 !important;
-}
-
-/* small visual tweaks */
-.main-header {
-    font-size: 2.6rem;
-    color: #2E7D32;
-    text-align: center;
-    margin-bottom: 0.5rem;
-}
-.sub-header {
-    font-size: 1.05rem;
-    color: #999;
-    text-align: center;
-    margin-bottom: 1rem;
-}
-
-.prediction-card {
-    background: #f8f9fa;
-    padding: 1.1rem;
-    border-radius: 10px;
-    border-left: 5px solid #4CAF50;
-    margin-top: 8px;
-}
-.risk-high { border-left-color: #f44336 !important; }
-.risk-low { border-left-color: #4CAF50 !important; }
-
-/* make selectboxes/inputs stretch nicely inside columns */
-[data-testid="stVerticalBlock"] .stNumberInput, 
-[data-testid="stVerticalBlock"] .stSelectbox {
-    width: 100%;
-}
-
-/* responsive: reduce width on small screens */
-@media (max-width: 900px) {
-  .main > div.block-container {
-      padding-left: 1rem !important;
-      padding-right: 1rem !important;
-  }
-  .app-inner-container { max-width: 100% !important; }
-}
-</style>
-""", unsafe_allow_html=True)
-
 # Header
 st.markdown('<h1 class="main-header">💓 Cardiovascular Disease Risk Prediction</h1>', unsafe_allow_html=True)
 st.markdown('<p class="sub-header">Enter your details below to assess your heart health risk.</p>', unsafe_allow_html=True)
 
-# Optional inner wrapper (controls how much area the form covers inside the block-container)
-st.markdown('<div class="app-inner-container">', unsafe_allow_html=True)
+# Main Container with Theme Card Style
+# st.markdown('<div class="theme-card">', unsafe_allow_html=True)
 
 # Inputs
 st.subheader("👤 Personal & Physical Details")
@@ -129,7 +70,7 @@ with col3:
 
     st.markdown(
         f"""
-        <div style="margin-top:5px; font-size:1rem; color:gray;">📌 BMI</div>
+        <div style="margin-top:5px; font-size:1rem;">📌 BMI</div>
         <div style="display:flex; align-items:center; gap:10px;">
             <div style="font-size:1.5rem; font-weight:bold;">{bmi:.1f}</div>
             <div style="color:{bmi_color}; font-weight:bold; font-size:1.5rem;">{bmi_cat}</div>
@@ -178,14 +119,31 @@ if st.button("🔮 Predict My Risk"):
     }
 
     df = pd.DataFrame([row])
-    df[["height","weight","ap_hi","ap_lo","bmi","age_years"]] = scaler.transform(
-        df[["height","weight","ap_hi","ap_lo","bmi","age_years"]]
-    )
+    
+    # Feature Engineering (Must match training logic)
+    df['pulse_pressure'] = df['ap_hi'] - df['ap_lo']
+    df['map'] = df['ap_lo'] + (df['pulse_pressure'] / 3)
+    
+    # Scale numerical columns
+    num_cols = ["height","weight","ap_hi","ap_lo","bmi","age_years","pulse_pressure","map"]
+    df[num_cols] = scaler.transform(df[num_cols])
 
     proba = model.predict_proba(df)[0,1]
     proba_percent = proba * 100
     pred = int(proba >= threshold)
+    
+    # Store results in session state
+    st.session_state.prediction_result = {
+        "proba_percent": proba_percent,
+        "pred": pred
+    }
 
+# Display results if they exist in session state
+if "prediction_result" in st.session_state and st.session_state.prediction_result is not None:
+    result = st.session_state.prediction_result
+    proba_percent = result["proba_percent"]
+    pred = result["pred"]
+    
     st.subheader("🔍 Result")
 
     # choose color
@@ -201,28 +159,73 @@ if st.button("🔮 Predict My Risk"):
         <div style="
             width:100%;
             height:28px;
-            background:#2f2f2f;
-            border-radius:10px;
+            background:#e0e0e0;
+            border-radius:14px;
             overflow:hidden;
             margin-top:10px;
-            margin-bottom:6px;
+            margin-bottom:20px;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
         ">
             <div style="
                 width:{proba_percent}%;
                 height:100%;
                 background:{bar_color};
+                border-radius:14px;
                 transition: width 0.6s ease;
+                background-image: linear-gradient(45deg,rgba(255,255,255,.15) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.15) 50%,rgba(255,255,255,.15) 75%,transparent 75%,transparent);
+                background-size: 1rem 1rem;
             ">
             </div>
         </div>
     """, unsafe_allow_html=True)
 
-    st.metric("Risk Probability", f"{proba_percent:.2f}%")
+    # Custom Result Display
+    st.markdown(f"""
+        <div style="text-align: center; margin-bottom: 20px;">
+            <p style="font-size: 1.2rem; margin-bottom: 5px; color: var(--text-color);">Risk Probability</p>
+            <h1 style="font-size: 4.5rem; color: {bar_color}; margin: 0; font-weight: 800; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">{proba_percent:.2f}%</h1>
+        </div>
+    """, unsafe_allow_html=True)
 
     if pred == 1:
-        st.error("⚠️ High Risk of Cardiovascular Disease")
+        st.markdown(f"""
+            <div style="
+                background-color: rgba(255, 23, 68, 0.1); 
+                border: 1px solid #ff1744; 
+                padding: 20px; 
+                border-radius: 12px; 
+                text-align: center; 
+                margin-top: 10px;
+                box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            ">
+                <h2 style="color: #ff1744; margin: 0; display: flex; align-items: center; justify-content: center; gap: 10px;">
+                    ⚠️ High Risk Detected
+                </h2>
+                <p style="margin-top: 10px; font-size: 1.1rem; opacity: 0.9;">
+                    The model predicts a significant likelihood of cardiovascular disease. 
+                    <strong>Please consult a healthcare professional for a thorough check-up.</strong>
+                </p>
+            </div>
+        """, unsafe_allow_html=True)
     else:
-        st.success("✔️ Low Risk of Cardiovascular Disease")
+        st.markdown(f"""
+            <div style="
+                background-color: rgba(0, 200, 83, 0.1); 
+                border: 1px solid #00c853; 
+                padding: 20px; 
+                border-radius: 12px; 
+                text-align: center; 
+                margin-top: 10px;
+                box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            ">
+                <h2 style="color: #00c853; margin: 0; display: flex; align-items: center; justify-content: center; gap: 10px;">
+                    ✔️ Low Risk Detected
+                </h2>
+                <p style="margin-top: 10px; font-size: 1.1rem; opacity: 0.9;">
+                    Your results look good! Keep up the healthy lifestyle habits.
+                </p>
+            </div>
+        """, unsafe_allow_html=True)
 
 # close inner wrapper
 st.markdown('</div>', unsafe_allow_html=True)
