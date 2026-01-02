@@ -21,20 +21,29 @@ This project includes:
 cardio-risk-prediction/
 ├─ data/
 │  ├─ processed/
-│  │  ├─ cleaned_data.csv      # Preprocessed dataset (after notebooks)
-│  │  ├─ X_train.csv, X_test.csv, y_train.csv, y_test.csv (legacy)
+│  │  ├─ cleaned_data.csv      # Preprocessed dataset
+│  ├─ raw/                     # Original dataset
 ├─ models/
-│  ├─ best_model.pkl          # Trained RandomForest model
-│  ├─ scaler.pkl              # StandardScaler fitted on training data
-│  ├─ threshold.pkl           # Optimal probability threshold (Youden's J)
+│  ├─ best_model.pkl          # Trained classifier (RF/XGB/LGBM)
+│  ├─ scaler.pkl              # Fitted StandardScaler
+│  ├─ threshold.pkl           # Optimal probability threshold
+│  ├─ best_threshold.pkl      # (Variant) Optimal threshold
+│  ├─ model_metrics.pkl       # Performance metrics
 ├─ notebooks/
 │  ├─ 01_exploratory_data_analysis.ipynb
-│  ├─ 02_preprocessing.ipynb  # Data cleaning + feature engineering
-│  ├─ 03_model_training.ipynb # Model training experiments & analysis
+│  ├─ 02_preprocessing.ipynb
+│  ├─ 03_model_training.ipynb
 ├─ src/
-│  ├─ train_model.py          # Training and evaluation script
+│  ├─ preprocess.py           # Data preprocessing script
+│  ├─ train_model.py          # Model training script
 ├─ streamlit_app/
-│  ├─ app.py                  # Streamlit front-end for predictions
+│  ├─ pages/                  # Multi-page app support
+│  │  ├─ 1_About_the_Model.py
+│  │  ├─ 2_Health_Tips.py
+│  │  ├─ 3_Disclaimer.py
+│  ├─ app.py                  # Main Streamlit application
+│  ├─ utils.py                # Helper functions and themes
+├─ check_model.py             # Utility to check model status
 ├─ requirements.txt
 ├─ README.md
 ```
